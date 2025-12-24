@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CEO Monitor Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Un poco de estilo para que no se vea feo */
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .chat-box { background: white; height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .mensaje-asistente { color: blue; margin-bottom: 5px; }
+        .mensaje-usuario { color: green; margin-bottom: 5px; }
+        .btn-rojo { background: red; color: white; border: none; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Monitor de Conversaciones</h1>
+    <div id="lista-mensajes" class="chat-box"></div>
+    <button class="btn-rojo" onclick="detenerSeguimiento()">🔴 Salir de la conversación</button>
+
+    <script>
+        // Configuración de Supabase
+        const supabaseUrl = 'TU_SUPABASE_URL';
+        const supabaseKey = 'TU_SUPABASE_ANON_KEY';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Escuchar mensajes en tiempo real
+        supabase
+          .channel('cambios-mensajes')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
+            const msg = payload.new;
+            const div = document.getElementById('lista-mensajes');
+            div.innerHTML += `<p class="mensaje-${msg.remitente}"><b>${msg.remitente.toUpperCase()}:</b> ${msg.texto}</p>`;
+            div.scrollTop = div.scrollHeight; // Auto-scroll
+          })
+          .subscribe();
+
+        async function detenerSeguimiento() {
+            // Aquí pones la lógica para borrar el ID de la tabla filtro_telegram_ceo
+            alert("Conversación finalizada y filtro borrado.");
+        }
+    </script>
+</body>
+</html>
