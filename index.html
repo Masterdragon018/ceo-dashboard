@@ -127,20 +127,29 @@
         }
 
         // 4. SUSCRIPCIÓN EN TIEMPO REAL (Supabase Realtime)
+        // SUSCRIPCIÓN EN TIEMPO REAL MEJORADA                                                
         _supabase
-            .channel('public-mensajes')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
-                // Si el mensaje nuevo es del usuario que estamos viendo, lo pintamos
+            .channel('room1') // Nombre del canal (puede ser cualquiera)
+            .on('postgres_changes', { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'mensajes_monitoreo' 
+            }, payload => {
+                console.log("¡Nuevo mensaje recibido!", payload.new);
+                // Si el mensaje es del usuario que el CEO está mirando ahora mismo
                 if (usuarioSeleccionado && payload.new.user_id === usuarioSeleccionado) {
                     renderizarMensaje(payload.new);
                 }
             })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, () => {
-                // Si alguien añade un ID nuevo al filtro en n8n, refrescamos la lista lateral
+            .on('postgres_changes', { 
+                event: '*', 
+                schema: 'public', 
+                table: 'filtro_telegram_ceo' 
+            }, () => {
+                // Si el filtro cambia (borrado o nuevo), refrescamos la lista lateral
                 cargarFiltros();
             })
             .subscribe();
-
         // 5. Función del BOTÓN ROJO (Borrar el filtro)
         async function detenerSeguimiento() {
             if (!usuarioSeleccionado) return;
