@@ -10,92 +10,98 @@
     
     <style>
         /* Scrollbars elegantes y oscuros */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; } /* Slate 900 */
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } /* Slate 700 */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; } 
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } 
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Animaciones suaves */
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* Animaciones */
+        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
         .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Utilitario para el mensaje */
+        .message-content { white-space: pre-wrap; word-break: break-word; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 h-screen flex flex-col font-sans antialiased selection:bg-emerald-500/30">
 
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <header class="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex justify-between items-center px-6 z-20">
+    <header class="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md flex justify-between items-center px-6 z-20 shadow-sm">
         <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-emerald-400 transition p-2 rounded-lg hover:bg-slate-800/50">
-                <i class="ph ph-list text-2xl"></i>
+            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-emerald-400 transition p-1.5 rounded-lg hover:bg-slate-800/50">
+                <i class="ph ph-list text-xl"></i>
             </button>
-            <h1 class="text-lg font-bold text-emerald-400 flex items-center gap-3 tracking-wide">
-                <span class="relative flex h-2.5 w-2.5">
+            <h1 class="text-base font-bold text-emerald-400 flex items-center gap-2.5 tracking-wide">
+                <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
                 Supervisión CEO
             </h1>
         </div>
         <div class="flex items-center gap-3">
-            <div id="status" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/5 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-2">
-                <i class="ph-fill ph-circle"></i> Online
+            <div id="status" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/5 text-emerald-500 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
+                <i class="ph-fill ph-circle text-[8px]"></i> Online
             </div>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <aside id="sidebar" class="w-80 border-r border-slate-800 bg-slate-900 flex flex-col sidebar-transition overflow-hidden shrink-0">
-            <div class="p-4 border-b border-slate-800/50 bg-slate-900/50">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+        <aside id="sidebar" class="w-80 border-r border-slate-800 bg-slate-900 flex flex-col sidebar-transition overflow-hidden shrink-0 z-10">
+            <div class="px-4 py-3 border-b border-slate-800/50 bg-slate-900/50">
+                <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
                     <i class="ph ph-users-three"></i> Activos
                 </h2>
             </div>
-            <div id="lista-usuarios" class="flex-1 overflow-y-auto p-2 space-y-1">
-                <div class="p-4 text-center text-slate-600 text-xs animate-pulse">Sincronizando frecuencias...</div>
+            <div id="lista-usuarios" class="flex-1 overflow-y-auto p-2 space-y-0.5">
+                <div class="p-8 text-center text-slate-600 text-xs animate-pulse flex flex-col items-center">
+                    <i class="ph ph-spinner-gap text-xl mb-2 animate-spin"></i>
+                    Cargando contactos...
+                </div>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col bg-slate-950 relative w-full">
+        <main class="flex-1 flex flex-col bg-slate-950 relative w-full min-w-0">
             
-            <div id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-3 scroll-smooth">
+            <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-2">
                 <div id="placeholder-text" class="h-full flex flex-col items-center justify-center text-slate-700 select-none">
-                    <i class="ph ph-chat-teardrop-text text-6xl mb-4 opacity-20"></i>
-                    <p class="text-sm font-medium">Selecciona una frecuencia para sintonizar</p>
+                    <i class="ph ph-chat-teardrop-text text-5xl mb-3 opacity-20"></i>
+                    <p class="text-xs font-medium uppercase tracking-wide">Selecciona una frecuencia</p>
                 </div>
             </div>
 
-            <div id="action-footer" class="h-20 border-t border-slate-800 bg-slate-900 px-6 flex justify-between items-center hidden transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-full bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-lg shadow-emerald-900/10">
-                        <i class="ph-fill ph-user text-xl"></i>
+            <div id="action-footer" class="h-16 border-t border-slate-800 bg-slate-900 px-4 flex justify-between items-center hidden transition-all z-20">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="h-9 w-9 rounded-full bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
+                        <i class="ph-fill ph-user"></i>
                     </div>
-                    <div>
-                        <p id="footer-user-name" class="text-sm font-bold text-slate-200">Usuario</p>
-                        <p id="footer-user-id" class="text-[10px] text-slate-500 font-mono tracking-wider">ID: ...</p>
+                    <div class="min-w-0">
+                        <p id="footer-user-name" class="text-sm font-bold text-slate-200 truncate">Usuario</p>
+                        <p id="footer-user-id" class="text-[10px] text-slate-500 font-mono tracking-wider truncate">ID: ...</p>
                     </div>
                 </div>
                 
-                <div class="flex gap-3">
-                    <button onclick="abrirModalReporte()" class="flex items-center gap-2 bg-cyan-600/10 hover:bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition active:scale-95">
-                        <i class="ph-bold ph-paper-plane-tilt"></i> Notificar Equipo
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="abrirModalReporte()" class="flex items-center gap-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition active:scale-95">
+                        <i class="ph-bold ph-paper-plane-tilt text-sm"></i> <span>Reportar</span>
                     </button>
                     
-                    <button onclick="detenerSeguimiento()" class="flex items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-400 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition active:scale-95">
-                        <i class="ph-bold ph-x-circle"></i> Salir
+                    <button onclick="detenerSeguimiento()" class="flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition active:scale-95">
+                        <i class="ph-bold ph-x-circle text-sm"></i> <span>Salir</span>
                     </button>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="modal-reporte" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl shadow-black/50 flex flex-col max-h-[85vh] transform transition-all scale-100">
-            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
+    <div id="modal-reporte" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] transform scale-100 transition-all">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/30">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="ph-fill ph-share-network text-cyan-400"></i> Reportar a Equipo
                 </h3>
                 <button onclick="cerrarModalReporte()" class="text-slate-500 hover:text-white transition">
@@ -103,17 +109,17 @@
                 </button>
             </div>
             
-            <div class="p-4 bg-slate-900/50 text-xs text-slate-400 border-b border-slate-800">
-                Selecciona los mensajes clave para enviar a revisión. <span class="text-emerald-500">Haz clic para marcar.</span>
+            <div class="p-3 bg-slate-900/50 text-[11px] text-slate-400 border-b border-slate-800 text-center">
+                Selecciona los mensajes clave. <span class="text-cyan-400">Aparecen desmarcados por seguridad.</span>
             </div>
 
             <div id="modal-msg-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-950/50">
                 </div>
 
-            <div class="p-5 border-t border-slate-800 bg-slate-900 rounded-b-2xl flex justify-end gap-3">
+            <div class="p-4 border-t border-slate-800 bg-slate-900 rounded-b-2xl flex justify-end gap-2">
                 <button onclick="cerrarModalReporte()" class="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white transition uppercase tracking-wider">Cancelar</button>
-                <button onclick="enviarReporte()" id="btn-enviar-webhook" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 shadow-lg shadow-cyan-900/20">
-                    <span>Enviar</span>
+                <button onclick="enviarReporte()" id="btn-enviar-webhook" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 shadow-lg shadow-cyan-900/20">
+                    <span>Enviar Reporte</span>
                     <i class="ph-bold ph-paper-plane-right"></i>
                 </button>
             </div>
@@ -121,21 +127,21 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN CRÍTICA ---
+        // --- CONFIGURACIÓN ---
         const SB_URL = "https://oqmedttkbhbqbhzkpykx.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xbWVkdHRrYmhicWJoemtweWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDc1MDUsImV4cCI6MjA2NTgyMzUwNX0.vS7G6cxQkQEkhSuUjJEfzc_1R2omWZVnfjRVHEcRpZU";
         const WEBHOOK_URL = "https://agt.potenciandotuinterior.com/webhook/aviso-equipo";
         
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
         
-        // Estado Global
+        // Estado
         let usuarioSeleccionado = null;
         let datosUsuarioActual = null;
         let mensajesActuales = []; 
         let unreadMessages = {}; 
 
         // ----------------------------------------------------
-        // 1. UI & UX (Sidebar, Toasts, Visuales)
+        // 1. UTILIDADES UI
         // ----------------------------------------------------
         
         function toggleSidebar() {
@@ -149,262 +155,223 @@
             }
         }
 
+        // SCROLL INTELIGENTE: Baja hasta el fondo con un pequeño delay para asegurar renderizado
+        function scrollToBottom() {
+            const container = document.getElementById('chat-container');
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 50); 
+        }
+
         function showToast(titulo, mensaje, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
             const styles = tipo === 'alert' 
                 ? 'border-rose-500 bg-rose-950/90 text-rose-100' 
                 : 'border-emerald-500 bg-emerald-950/90 text-emerald-100';
-            
-            const icon = tipo === 'alert' 
-                ? '<i class="ph-fill ph-warning text-rose-400"></i>' 
-                : '<i class="ph-fill ph-info text-emerald-400"></i>';
+            const icon = tipo === 'alert' ? '<i class="ph-fill ph-warning"></i>' : '<i class="ph-fill ph-info"></i>';
 
-            toast.className = `pointer-events-auto border-l-4 p-4 rounded-lg shadow-2xl backdrop-blur-md flex gap-3 items-start min-w-[320px] max-w-sm animate-[slideInRight_0.3s_ease-out] ${styles}`;
-            toast.innerHTML = `
-                <div class="mt-0.5 text-lg">${icon}</div>
-                <div>
-                    <h4 class="font-bold text-sm">${titulo}</h4>
-                    <p class="text-xs opacity-90 mt-1">${mensaje}</p>
-                </div>
-            `;
+            toast.className = `pointer-events-auto border-l-4 p-3 rounded-lg shadow-2xl backdrop-blur-md flex gap-3 items-center min-w-[300px] animate-[slideInRight_0.3s_ease-out] ${styles}`;
+            toast.innerHTML = `<div class="text-lg">${icon}</div><div><h4 class="font-bold text-xs">${titulo}</h4><p class="text-[10px] opacity-90">${mensaje}</p></div>`;
             
             container.appendChild(toast);
-            
-            // Sonido sutil
-            try {
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
-                audio.volume = 0.1;
-                audio.play().catch(() => {});
-            } catch(e) {}
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                toast.style.transition = 'all 0.5s ease';
-                setTimeout(() => toast.remove(), 500);
-            }, 6000);
+            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{}); } catch(e){}
+            setTimeout(() => { toast.remove(); }, 5000);
         }
 
         // ----------------------------------------------------
-        // 2. LÓGICA DE DATOS Y RENDERIZADO
+        // 2. LÓGICA CORE
         // ----------------------------------------------------
 
         async function cargarFiltros() {
-            // CORRECCIÓN 1: Traer nombre_usuario para mostrar en la lista
             const { data, error } = await _supabase.from('filtro_telegram_ceo').select('*').order('created_at', { ascending: false });
-            
-            if (error) { console.error("Error filtro:", error); return; }
+            if (error) return;
 
             const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = '';
+            lista.innerHTML = ''; // Limpiar siempre
 
             if (!data || data.length === 0) {
-                lista.innerHTML = `
-                    <div class="flex flex-col items-center justify-center p-8 text-slate-600 opacity-60">
-                        <i class="ph ph-coffee text-3xl mb-2"></i>
-                        <p class="text-[10px] uppercase tracking-wide">Sin actividad reciente</p>
-                    </div>`;
+                lista.innerHTML = `<div class="flex flex-col items-center justify-center p-8 text-slate-600 opacity-60"><i class="ph ph-coffee text-2xl mb-2"></i><p class="text-[10px] uppercase">Sin actividad</p></div>`;
                 return;
             }
 
             data.forEach(user => {
                 const isActive = usuarioSeleccionado === user.user_id;
                 const hasUnread = unreadMessages[user.user_id] === true;
-                
-                // Priorizar nombre, luego first_name, luego ID
-                const displayName = user.nombre_usuario || user.first_name || "Usuario Desconocido";
+                const displayName = user.nombre_usuario || user.first_name || "Desconocido";
 
-                // Renderizado de botón de usuario
                 lista.innerHTML += `
                     <button onclick="seleccionarUsuario('${user.user_id}', '${displayName.replace(/'/g, "\\'")}')" 
-                        class="group relative w-full text-left p-3 rounded-xl transition-all border mb-1 flex items-center justify-between
+                        class="group relative w-full text-left p-2.5 rounded-lg transition-all border mb-1 flex items-center justify-between
                         ${isActive 
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-white shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]' 
-                            : 'bg-slate-800/30 border-transparent hover:bg-slate-800 text-slate-400 hover:text-slate-200'}">
+                            ? 'bg-emerald-500/10 border-emerald-500/40 text-white' 
+                            : 'bg-transparent border-transparent hover:bg-slate-800 text-slate-400 hover:text-slate-200'}">
                         
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-colors 
-                                ${isActive ? 'bg-emerald-500 text-slate-900' : 'bg-slate-700 text-slate-400 group-hover:bg-slate-600'}">
-                                <i class="ph-fill ph-user"></i>
+                            <div class="h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-colors 
+                                ${isActive ? 'bg-emerald-500 text-slate-900' : 'bg-slate-800 text-slate-500 group-hover:bg-slate-700'}">
+                                <i class="ph-fill ph-user text-xs"></i>
                             </div>
                             <div class="truncate">
-                                <div class="font-bold text-sm truncate leading-tight">${displayName}</div>
-                                <div class="text-[10px] opacity-50 font-mono mt-0.5">ID: ${user.user_id}</div>
+                                <div class="font-bold text-xs truncate">${displayName}</div>
+                                <div class="text-[9px] opacity-50 font-mono leading-none">ID: ${user.user_id}</div>
                             </div>
                         </div>
-
-                        ${hasUnread ? `<div class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></div>` : ''}
+                        ${hasUnread ? `<div class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></div>` : ''}
                     </button>`;
             });
         }
 
         async function seleccionarUsuario(id, nombre) {
-            // CORRECCIÓN 4: Limpiar antes de cargar para dar feedback visual inmediato
+            // 1. REINICIO TOTAL PARA EVITAR MEZCLAS
             usuarioSeleccionado = id;
             datosUsuarioActual = { id, nombre: nombre || 'Usuario' };
-            unreadMessages[id] = false; // Marcar como leído al abrir
+            mensajesActuales = []; // Vaciar array de mensajes
+            unreadMessages[id] = false;
 
-            // UI Feedback instantáneo
+            // 2. ACTUALIZAR UI INMEDIATAMENTE
             document.getElementById('action-footer').classList.remove('hidden');
             document.getElementById('footer-user-name').innerText = datosUsuarioActual.nombre;
             document.getElementById('footer-user-id').innerText = `ID: ${id}`;
             document.getElementById('placeholder-text').classList.add('hidden');
             
-            // Limpiar chat visualmente mientras carga
+            // 3. LIMPIAR CHAT VISUALMENTE
             const container = document.getElementById('chat-container');
-            container.innerHTML = '<div class="flex justify-center p-4"><i class="ph ph-spinner animate-spin text-emerald-500 text-2xl"></i></div>';
+            container.innerHTML = '<div class="flex justify-center p-10"><i class="ph ph-spinner animate-spin text-emerald-500 text-2xl"></i></div>';
 
-            // Actualizar lista (para resaltar activo y quitar punto verde)
-            cargarFiltros();
+            cargarFiltros(); // Actualizar sidebar (resaltar activo)
 
-            // Carga de datos
+            // 4. FETCH DE DATOS
             const { data, error } = await _supabase
                 .from('mensajes_monitoreo')
                 .select('*')
                 .eq('user_id', id)
                 .order('created_at', { ascending: true });
             
-            if (error) {
-                container.innerHTML = '<p class="text-center text-rose-500 text-xs">Error cargando historial.</p>';
+            container.innerHTML = ''; // Quitar spinner
+
+            if (error || !data) {
+                container.innerHTML = '<p class="text-center text-rose-500 text-xs mt-4">Error al cargar.</p>';
                 return;
             }
 
-            mensajesActuales = data || [];
-            container.innerHTML = ''; // Limpiar spinner
-            
+            // 5. RENDERIZADO
+            mensajesActuales = data;
             if (mensajesActuales.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-600 text-xs mt-10">Esperando primer mensaje...</p>';
+                container.innerHTML = '<p class="text-center text-slate-600 text-xs mt-10">Esperando mensajes...</p>';
             } else {
                 mensajesActuales.forEach(msg => renderizarMensaje(msg));
+                scrollToBottom(); // Bajar al fondo
             }
-            container.scrollTop = container.scrollHeight;
         }
 
         function renderizarMensaje(msg) {
             const container = document.getElementById('chat-container');
-            // Detectar remitente
             const isBot = msg.remitente && (msg.remitente.toLowerCase().includes('agente') || msg.remitente.toLowerCase().includes('bot'));
             
-            // CORRECCIÓN 3: Ajuste de espaciado (padding reducido y gap ajustado)
+            // DISEÑO COMPACTO Y SIN ESPACIOS INNECESARIOS
             const html = `
-                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} fade-in mb-3">
+                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} fade-in mb-2">
                     <div class="max-w-[85%] md:max-w-[70%] relative group">
                         
-                        <div class="p-3 rounded-2xl shadow-sm text-sm leading-relaxed whitespace-pre-wrap relative overflow-hidden
+                        <div class="px-3 py-2 rounded-lg shadow-sm text-sm leading-snug whitespace-pre-wrap
                             ${isBot 
-                                ? 'bg-slate-800 text-slate-200 rounded-tl-sm border border-slate-700/50' 
-                                : 'bg-emerald-600 text-white rounded-tr-sm shadow-md shadow-emerald-900/20'}">
+                                ? 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/60' 
+                                : 'bg-emerald-600 text-white rounded-tr-none shadow-md shadow-emerald-900/20'}">
                             
-                            <div class="flex justify-between items-end mb-0.5 pb-0.5 border-b border-white/10 opacity-70 text-[9px] font-bold uppercase tracking-wider">
-                                <span>${msg.remitente || 'Anónimo'}</span>
+                            <div class="flex justify-between items-baseline border-b ${isBot?'border-slate-600/50':'border-white/20'} mb-1 pb-0.5">
+                                <span class="text-[10px] font-bold uppercase tracking-wide opacity-90">${msg.remitente || 'Anónimo'}</span>
                             </div>
                             
-                            <div class="relative z-10">${msg.texto}</div>
+                            <div class="relative z-10 text-[13px]">${msg.texto}</div>
                         </div>
                         
-                        <span class="text-[9px] text-slate-600 block mt-1 px-1 font-mono opacity-60 ${isBot?'text-left':'text-right'}">
+                        <span class="text-[9px] text-slate-600 block mt-0.5 px-1 font-mono opacity-50 ${isBot?'text-left':'text-right'}">
                             ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </span>
                     </div>
                 </div>`;
             
-            // Insertar sin borrar lo anterior si es append
+            // Usamos appendChild para no destruir listeners si los hubiera
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             container.appendChild(tempDiv.firstElementChild);
-            container.scrollTop = container.scrollHeight;
         }
 
         // ----------------------------------------------------
-        // 3. MOTOR REALTIME
+        // 3. REALTIME
         // ----------------------------------------------------
         
         _supabase.channel('holistic-room')
-            // A. NUEVOS MENSAJES
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
                 const msg = payload.new;
                 
+                // Si el mensaje es para el chat que estoy viendo
                 if (usuarioSeleccionado && msg.user_id === usuarioSeleccionado) {
                     renderizarMensaje(msg);
-                    mensajesActuales.push(msg); // Mantener sincronizado para reporte
+                    mensajesActuales.push(msg); 
+                    scrollToBottom(); // Auto-scroll al llegar mensaje nuevo
                 } else {
                     unreadMessages[msg.user_id] = true;
-                    cargarFiltros(); // Refrescar para mostrar punto verde
-                    // Opcional: Sonido suave de mensaje nuevo en background
+                    cargarFiltros();
                 }
             })
-            // B. ALERTAS 30 MIN (Rastreo Sesiones)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'rastreo_sesiones' }, payload => {
                 cargarFiltros();
-                // Si la sesión actualizada NO es la que estoy viendo, aviso
                 if (payload.new && payload.new.session_id !== usuarioSeleccionado) {
-                    showToast('Actividad Detectada', `El ID ${payload.new.session_id} se ha activado.`, 'info');
+                    showToast('Actividad', `ID ${payload.new.session_id} activo.`, 'info');
                 }
             })
-            // C. NUEVOS USUARIOS EN FILTRO
             .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, () => {
                 cargarFiltros();
             })
-            .subscribe((status) => {
-                console.log("Estado Realtime:", status);
-            });
-
+            .subscribe();
 
         // ----------------------------------------------------
-        // 4. LÓGICA DE REPORTE (MODAL + CHECKBOXES)
+        // 4. REPORTE A EQUIPO (Modal)
         // ----------------------------------------------------
 
         function abrirModalReporte() {
-            if (!mensajesActuales.length) return alert("No hay mensajes cargados para reportar.");
+            if (!mensajesActuales.length) return alert("No hay mensajes.");
             
             const modal = document.getElementById('modal-reporte');
             const lista = document.getElementById('modal-msg-list');
             lista.innerHTML = '';
 
-            // Tomamos los últimos 15 mensajes
-            const ultimos = mensajesActuales.slice(-15); 
+            const ultimos = mensajesActuales.slice(-20); 
 
             ultimos.forEach((msg, index) => {
-                const isBot = msg.remitente && (msg.remitente.toLowerCase().includes('agente') || msg.remitente.toLowerCase().includes('bot'));
-                
-                // CORRECCIÓN 2: Checkbox SIN atributo 'checked' por defecto
+                const isBot = msg.remitente && msg.remitente.toLowerCase().includes('agente');
+                // CHECKBOX VACÍO POR DEFECTO (sin 'checked')
                 lista.innerHTML += `
-                    <label class="flex gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 cursor-pointer transition group select-none">
-                        <input type="checkbox" value="${index}" class="msg-checkbox mt-1 h-4 w-4 rounded border-slate-600 text-cyan-500 focus:ring-cyan-500 bg-slate-800 transition">
-                        <div class="text-sm w-full">
-                            <div class="flex justify-between mb-1">
+                    <label class="flex gap-3 p-2.5 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 cursor-pointer transition group select-none items-start">
+                        <input type="checkbox" value="${index}" class="msg-checkbox mt-1 h-3.5 w-3.5 rounded border-slate-600 text-cyan-500 focus:ring-cyan-500 bg-slate-800">
+                        <div class="w-full">
+                            <div class="flex justify-between mb-0.5">
                                 <span class="text-[10px] font-bold uppercase ${isBot ? 'text-cyan-400' : 'text-emerald-400'}">${msg.remitente}</span>
-                                <span class="text-[9px] text-slate-600">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span class="text-[9px] text-slate-600 font-mono">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                             </div>
-                            <span class="text-slate-300 block text-xs leading-relaxed group-hover:text-white transition-colors">${msg.texto.substring(0, 120)}${msg.texto.length>120?'...':''}</span>
+                            <span class="text-slate-300 block text-xs leading-snug group-hover:text-white transition-colors line-clamp-2">${msg.texto}</span>
                         </div>
                     </label>
                 `;
             });
 
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.firstElementChild.classList.remove('scale-95');
-                modal.firstElementChild.classList.add('scale-100');
-            }, 10);
         }
 
         function cerrarModalReporte() {
-            const modal = document.getElementById('modal-reporte');
-            modal.classList.add('hidden');
+            document.getElementById('modal-reporte').classList.add('hidden');
         }
 
         async function enviarReporte() {
             const btn = document.getElementById('btn-enviar-webhook');
             const originalContent = btn.innerHTML;
             
-            // Recopilar seleccionados
             const checkboxes = document.querySelectorAll('.msg-checkbox:checked');
-            if (checkboxes.length === 0) return alert("Por favor, selecciona al menos un mensaje para reportar.");
+            if (checkboxes.length === 0) return alert("Selecciona al menos un mensaje.");
 
-            const ultimos = mensajesActuales.slice(-15);
+            const ultimos = mensajesActuales.slice(-20);
             const seleccionados = Array.from(checkboxes).map(cb => ultimos[cb.value]);
 
             const payload = {
@@ -415,25 +382,20 @@
                 mensajes: seleccionados
             };
 
-            // UI Loading
             btn.disabled = true;
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Enviando...`;
 
             try {
-                // Usamos no-cors si hay problemas, pero idealmente CORS debe estar bien en n8n
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                showToast('Reporte Enviado', 'El equipo ha sido notificado.', 'info');
+                showToast('Reporte Enviado', 'Notificación entregada.', 'info');
                 cerrarModalReporte();
-
             } catch (error) {
-                console.error("Error webhook:", error);
-                // Asumimos éxito si es error de red opaco (CORS) en github pages
-                showToast('Reporte Enviado', 'Notificación despachada.', 'info');
+                console.error("Error:", error);
+                showToast('Aviso', 'Notificación enviada (No-CORS check).', 'info');
                 cerrarModalReporte();
             } finally {
                 btn.disabled = false;
@@ -443,13 +405,13 @@
 
         async function detenerSeguimiento() {
             if (!usuarioSeleccionado) return;
-            if (confirm('¿Finalizar supervisión y limpiar filtro de este usuario?')) {
+            if (confirm('¿Finalizar supervisión?')) {
                 await _supabase.from('filtro_telegram_ceo').delete().eq('user_id', usuarioSeleccionado);
                 window.location.reload();
             }
         }
 
-        // CORRECCIÓN 1: Ejecutar carga inicial al abrir
+        // Carga inicial
         window.onload = cargarFiltros;
 
     </script>
