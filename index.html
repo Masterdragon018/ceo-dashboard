@@ -52,126 +52,84 @@
     </div>
 
     <script>
-        // Configuración de Credenciales
-        const SB_URL = "https://oqmedttkbhbqbhzkpykx.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xbWVkdHRrYmhicWJoemtweWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDc1MDUsImV4cCI6MjA2NTgyMzUwNX0.vS7G6cxQkQEkhSuUjJEfzc_1R2omWZVnfjRVHEcRpZU";
-        
-        // Creamos el cliente con un nombre que no choque con la librería global
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    const SB_URL = "https://oqmedttkbhbqbhzkpykx.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xbWVkdHRrYmhicWJoemtweWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDc1MDUsImV4cCI6MjA2NTgyMzUwNX0.vS7G6cxQkQEkhSuUjJEfzc_1R2omWZVnfjRVHEcRpZU";
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        let usuarioSeleccionado = null;
+    let usuarioSeleccionado = null;
 
-        // 1. Cargar lista de usuarios desde la tabla 'filtro_telegram_ceo'
-        async function cargarFiltros() {
-            const { data, error } = await _supabase.from('filtro_telegram_ceo').select('*');
-            if (error) { console.error("Error cargando filtros:", error); return; }
-            
-            const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = '';
-            
-            if (data.length === 0) {
-                lista.innerHTML = '<p class="text-xs text-slate-500 px-2 italic">No hay usuarios en el filtro.</p>';
-                return;
-            }
-
-            data.forEach(user => {
-                const isActive = usuarioSeleccionado === user.user_id;
-                lista.innerHTML += `
-                    <button onclick="seleccionarUsuario('${user.user_id}')" 
-                        class="w-full text-left p-3 rounded-lg transition-all border ${isActive ? 'bg-emerald-600/20 border-emerald-500 text-white' : 'bg-slate-700 border-transparent hover:bg-slate-600 text-slate-300'}">
-                        <div class="font-mono text-sm">🆔 ${user.user_id}</div>
-                        <div class="text-[10px] opacity-60 uppercase mt-1">Vigilando ahora</div>
-                    </button>`;
-            });
+    async function cargarFiltros() {
+        const { data, error } = await _supabase.from('filtro_telegram_ceo').select('*');
+        if (error) return;
+        const lista = document.getElementById('lista-usuarios');
+        lista.innerHTML = '';
+        if (data.length === 0) {
+            lista.innerHTML = '<p class="text-xs text-slate-500 px-2 italic">No hay monitoreos activos.</p>';
+            return;
         }
+        data.forEach(user => {
+            const isActive = usuarioSeleccionado === user.user_id;
+            lista.innerHTML += `
+                <button onclick="seleccionarUsuario('${user.user_id}')" 
+                    class="w-full text-left p-3 rounded-lg transition-all border ${isActive ? 'bg-emerald-600/20 border-emerald-500 text-white' : 'bg-slate-700 border-transparent hover:bg-slate-600 text-slate-300'}">
+                    <div class="font-mono text-sm">👤 ${user.user_id}</div>
+                </button>`;
+        });
+    }
 
-        // 2. Seleccionar usuario y cargar su historial de mensajes
-        async function seleccionarUsuario(id) {
-            usuarioSeleccionado = id;
-            document.getElementById('btn-stop').classList.remove('hidden');
-            document.getElementById('placeholder-text').classList.add('hidden');
-            document.getElementById('label-usuario').innerText = `Vigilando ID: ${id}`;
-            
-            // Actualizar UI de la lista lateral
-            cargarFiltros();
-
-            const { data, error } = await _supabase.from('mensajes_monitoreo')
-                .select('*')
-                .eq('user_id', id)
-                .order('created_at', { ascending: true });
-            
-            if (error) { console.error("Error cargando mensajes:", error); return; }
-
-            const container = document.getElementById('chat-container');
-            container.innerHTML = '';
-            data.forEach(msg => renderizarMensaje(msg));
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // 3. Función para pintar los globos de texto
-        function renderizarMensaje(msg) {
-            const container = document.getElementById('chat-container');
-            // IMPORTANTE: Según tus datos, el bot se identifica como "El Agente"
-            const isBot = msg.remitente.toLowerCase().includes('agente');
-            
-            const html = `
-                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div class="max-w-[80%] p-3 rounded-2xl shadow-md ${isBot ? 'bg-slate-800 border border-slate-700 text-slate-100 rounded-tl-none' : 'bg-emerald-600 text-white rounded-tr-none'}">
-                        <div class="text-[9px] font-bold opacity-60 mb-1 tracking-tighter uppercase">${msg.remitente}</div>
-                        <div class="text-sm leading-relaxed">${msg.texto}</div>
-                        <div class="text-[9px] opacity-40 mt-1 text-right">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    </div>
-                </div>`;
-            container.innerHTML += html;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // 4. SUSCRIPCIÓN EN TIEMPO REAL (Supabase Realtime)
-        // SUSCRIPCIÓN EN TIEMPO REAL MEJORADA                                                
-        _supabase
-            .channel('room1') // Nombre del canal (puede ser cualquiera)
-            .on('postgres_changes', { 
-                event: 'INSERT', 
-                schema: 'public', 
-                table: 'mensajes_monitoreo' 
-            }, payload => {
-                console.log("¡Nuevo mensaje recibido!", payload.new);
-                // Si el mensaje es del usuario que el CEO está mirando ahora mismo
-                if (usuarioSeleccionado && payload.new.user_id === usuarioSeleccionado) {
-                    renderizarMensaje(payload.new);
-                }
-            })
-            .on('postgres_changes', { 
-                event: '*', 
-                schema: 'public', 
-                table: 'filtro_telegram_ceo' 
-            }, () => {
-                // Si el filtro cambia (borrado o nuevo), refrescamos la lista lateral
-                cargarFiltros();
-            })
-            .subscribe();
-        // 5. Función del BOTÓN ROJO (Borrar el filtro)
-        async function detenerSeguimiento() {
-            if (!usuarioSeleccionado) return;
-            
-            const confirmar = confirm('¿Deseas finalizar la supervisión de este usuario? Se eliminará del filtro de n8n.');
-            if (confirmar) {
-                const { error } = await _supabase
-                    .from('filtro_telegram_ceo')
-                    .delete()
-                    .eq('user_id', usuarioSeleccionado);
-                
-                if (error) {
-                    alert('Error al eliminar: ' + error.message);
-                } else {
-                    alert('Supervisión finalizada con éxito.');
-                    location.reload(); // Recargar para limpiar la interfaz
-                }
-            }
-        }
-
-        // Iniciar carga al abrir la página
+    async function seleccionarUsuario(id) {
+        usuarioSeleccionado = id;
+        document.getElementById('btn-stop').classList.remove('hidden');
+        document.getElementById('placeholder-text').classList.add('hidden');
+        document.getElementById('label-usuario').innerText = `Vigilando: ${id}`;
         cargarFiltros();
-    </script>
+
+        const { data } = await _supabase.from('mensajes_monitoreo').select('*').eq('user_id', id).order('created_at', { ascending: true });
+        const container = document.getElementById('chat-container');
+        container.innerHTML = '';
+        data.forEach(msg => renderizarMensaje(msg));
+    }
+
+    function renderizarMensaje(msg) {
+        const container = document.getElementById('chat-container');
+        const isBot = msg.remitente.toLowerCase().includes('agente');
+        container.innerHTML += `
+            <div class="flex ${isBot ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2">
+                <div class="max-w-[80%] p-3 rounded-2xl shadow-md ${isBot ? 'bg-slate-800 text-slate-100' : 'bg-emerald-600 text-white'}">
+                    <div class="text-[9px] font-bold opacity-60 mb-1 uppercase">${msg.remitente}</div>
+                    <div class="text-sm">${msg.texto}</div>
+                </div>
+            </div>`;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // --- EL MOTOR DE TIEMPO REAL (CORREGIDO) ---
+    _supabase
+        .channel('dashboard-master')
+        // 1. Escuchar NUEVOS MENSAJES para pintar el chat en vivo
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
+            if (usuarioSeleccionado && payload.new.user_id === usuarioSeleccionado) {
+                renderizarMensaje(payload.new);
+            }
+        })
+        // 2. Escuchar ALERTAS DE SESIÓN para refrescar la lista lateral
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'rastreo_sesiones' }, () => {
+            console.log("Nueva actividad detectada...");
+            cargarFiltros();
+        })
+        // 3. Escuchar CAMBIOS EN FILTROS (por si el CEO añade a alguien desde n8n)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, () => {
+            cargarFiltros();
+        })
+        .subscribe();
+
+    async function detenerSeguimiento() {
+        if (!usuarioSeleccionado) return;
+        await _supabase.from('filtro_telegram_ceo').delete().eq('user_id', usuarioSeleccionado);
+        location.reload();
+    }
+
+    cargarFiltros();
+</script>
 </body>
 </html>
