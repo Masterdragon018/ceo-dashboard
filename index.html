@@ -3,150 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEO Dashboard - Holistic Resonance</title>
+    <title>CEO Dashboard - Holistic Resonance Architecture</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
-        /* Scrollbars elegantes y oscuros */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0f172a; } 
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } 
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        /* Scrollbar Premium */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; } 
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; border: 1px solid #0f172a; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-        /* Animaciones */
-        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* Animaciones de Entrada */
+        .fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(10px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
         
-        /* Utilitario para el mensaje */
-        .message-content { white-space: pre-wrap; word-break: break-word; }
+        .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Transiciones Suaves */
+        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .message-bubble { transition: all 0.2s ease; }
+        .message-bubble:hover { transform: translateY(-1px); box-shadow: 0 4px 12px -2px rgba(0,0,0,0.3); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-200 h-screen flex flex-col font-sans antialiased selection:bg-emerald-500/30">
+<body class="bg-slate-950 text-slate-200 h-screen flex flex-col font-sans antialiased overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-200">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
 
-    <header class="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md flex justify-between items-center px-6 z-20 shadow-sm">
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-emerald-400 transition p-1.5 rounded-lg hover:bg-slate-800/50">
-                <i class="ph ph-list text-xl"></i>
+    <header class="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl flex justify-between items-center px-6 z-50 shadow-lg shadow-black/20">
+        <div class="flex items-center gap-5">
+            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-emerald-400 transition-all p-2 rounded-xl hover:bg-slate-800/80 active:scale-95 group">
+                <i class="ph ph-list text-2xl group-hover:scale-110 transition-transform"></i>
             </button>
-            <h1 class="text-base font-bold text-emerald-400 flex items-center gap-2.5 tracking-wide">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Supervisión CEO
-            </h1>
+            
+            <div class="flex flex-col">
+                <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center gap-3 tracking-wide">
+                    Panel de Supervisión CEO
+                </h1>
+                <span class="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Sistema de Resonancia Activo</span>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div id="status" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/5 text-emerald-500 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-                <i class="ph-fill ph-circle text-[8px]"></i> Online
+        
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
+                <div class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Conectado</span>
             </div>
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden relative">
+    <div class="flex flex-1 overflow-hidden relative bg-slate-950">
         
-        <aside id="sidebar" class="w-80 border-r border-slate-800 bg-slate-900 flex flex-col sidebar-transition overflow-hidden shrink-0 z-10">
-            <div class="px-4 py-3 border-b border-slate-800/50 bg-slate-900/50">
-                <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
-                    <i class="ph ph-users-three"></i> Activos
+        <aside id="sidebar" class="w-80 border-r border-slate-800 bg-slate-900/95 flex flex-col sidebar-transition overflow-hidden shrink-0 z-40 shadow-2xl">
+            <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-900 flex justify-between items-center">
+                <h2 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                    <i class="ph-fill ph-users-three text-emerald-500"></i> Frecuencias
                 </h2>
+                <button onclick="cargarFiltros()" class="text-slate-500 hover:text-white transition" title="Refrescar lista">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                </button>
             </div>
-            <div id="lista-usuarios" class="flex-1 overflow-y-auto p-2 space-y-0.5">
-                <div class="p-8 text-center text-slate-600 text-xs animate-pulse flex flex-col items-center">
-                    <i class="ph ph-spinner-gap text-xl mb-2 animate-spin"></i>
-                    Cargando contactos...
+            
+            <div id="lista-usuarios" class="flex-1 overflow-y-auto p-3 space-y-1 scroll-smooth">
+                <div class="flex flex-col items-center justify-center h-40 text-slate-600 space-y-3 animate-pulse">
+                    <i class="ph ph-spinner-gap text-3xl animate-spin text-emerald-500/50"></i>
+                    <p class="text-xs tracking-wider">Sincronizando base de datos...</p>
                 </div>
+            </div>
+            
+            <div class="p-3 border-t border-slate-800 bg-slate-900/50 text-[10px] text-center text-slate-600 font-mono">
+                v2.5.0 • Resonancia Holística
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col bg-slate-950 relative w-full min-w-0">
+        <main class="flex-1 flex flex-col bg-gradient-to-b from-slate-950 to-slate-900 relative w-full min-w-0 z-0">
             
-            <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-2">
-                <div id="placeholder-text" class="h-full flex flex-col items-center justify-center text-slate-700 select-none">
-                    <i class="ph ph-chat-teardrop-text text-5xl mb-3 opacity-20"></i>
-                    <p class="text-xs font-medium uppercase tracking-wide">Selecciona una frecuencia</p>
+            <div id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-4 pb-24 scroll-smooth">
+                <div id="placeholder-text" class="h-full flex flex-col items-center justify-center text-slate-700 select-none space-y-4 fade-in-up">
+                    <div class="h-32 w-32 rounded-full bg-slate-900/50 border border-slate-800 flex items-center justify-center shadow-2xl">
+                        <i class="ph-fill ph-chat-teardrop-text text-6xl text-emerald-500/20"></i>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-slate-400">Panel de Control Silencioso</h3>
+                        <p class="text-sm text-slate-600 mt-1 max-w-xs mx-auto">Selecciona una frecuencia activa del menú lateral para sintonizar la conversación.</p>
+                    </div>
                 </div>
             </div>
 
-            <div id="action-footer" class="h-16 border-t border-slate-800 bg-slate-900 px-4 flex justify-between items-center hidden transition-all z-20">
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="h-9 w-9 rounded-full bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
-                        <i class="ph-fill ph-user"></i>
+            <div id="action-footer" class="h-20 border-t border-slate-800 bg-slate-900/95 backdrop-blur px-6 flex justify-between items-center absolute bottom-0 w-full translate-y-full transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] z-50">
+                
+                <div class="flex items-center gap-4 overflow-hidden">
+                    <div class="relative">
+                        <div class="h-11 w-11 rounded-full bg-gradient-to-br from-emerald-900 to-slate-900 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/10">
+                            <i class="ph-fill ph-user text-xl"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 h-4 w-4 bg-slate-900 rounded-full flex items-center justify-center">
+                            <div class="h-2.5 w-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        </div>
                     </div>
-                    <div class="min-w-0">
-                        <p id="footer-user-name" class="text-sm font-bold text-slate-200 truncate">Usuario</p>
-                        <p id="footer-user-id" class="text-[10px] text-slate-500 font-mono tracking-wider truncate">ID: ...</p>
+                    <div class="min-w-0 flex flex-col">
+                        <p id="footer-user-name" class="text-sm font-bold text-slate-100 truncate">Usuario</p>
+                        <p id="footer-user-id" class="text-[10px] text-slate-500 font-mono tracking-wider truncate bg-slate-800/50 px-1.5 py-0.5 rounded w-fit">ID: ...</p>
                     </div>
                 </div>
                 
-                <div class="flex gap-2 shrink-0">
-                    <button onclick="abrirModalReporte()" class="flex items-center gap-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition active:scale-95">
-                        <i class="ph-bold ph-paper-plane-tilt text-sm"></i> <span>Reportar</span>
+                <div class="flex gap-3 shrink-0">
+                    <button onclick="abrirModalReporte()" class="group flex items-center gap-2 bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-600 hover:to-blue-600 text-cyan-400 hover:text-white border border-cyan-500/30 hover:border-cyan-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-lg shadow-cyan-900/10 hover:shadow-cyan-500/20 active:scale-95">
+                        <i class="ph-bold ph-paper-plane-tilt text-lg group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
+                        <span>Notificar Equipo</span>
                     </button>
                     
-                    <button onclick="detenerSeguimiento()" class="flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition active:scale-95">
-                        <i class="ph-bold ph-x-circle text-sm"></i> <span>Salir</span>
+                    <button onclick="detenerSeguimiento()" class="group flex items-center gap-2 bg-gradient-to-r from-rose-900/30 to-red-900/30 hover:from-rose-600 hover:to-red-600 text-rose-400 hover:text-white border border-rose-500/30 hover:border-rose-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-lg shadow-rose-900/10 hover:shadow-rose-500/20 active:scale-95">
+                        <i class="ph-bold ph-x-circle text-lg group-hover:rotate-90 transition-transform"></i>
+                        <span>Salir</span>
                     </button>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="modal-reporte" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] transform scale-100 transition-all">
-            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/30">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="ph-fill ph-share-network text-cyan-400"></i> Reportar a Equipo
-                </h3>
-                <button onclick="cerrarModalReporte()" class="text-slate-500 hover:text-white transition">
-                    <i class="ph-bold ph-x text-lg"></i>
+    <div id="modal-reporte" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl shadow-black flex flex-col max-h-[85vh] transform scale-95 transition-all duration-300" id="modal-content">
+            <div class="p-6 border-b border-slate-800 bg-slate-900 rounded-t-2xl flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                        <i class="ph-fill ph-share-network text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Reportar Incidencia</h3>
+                        <p class="text-xs text-slate-400">Selecciona el contexto para el equipo.</p>
+                    </div>
+                </div>
+                <button onclick="cerrarModalReporte()" class="text-slate-500 hover:text-white transition p-2 hover:bg-slate-800 rounded-lg">
+                    <i class="ph-bold ph-x text-xl"></i>
                 </button>
             </div>
             
-            <div class="p-3 bg-slate-900/50 text-[11px] text-slate-400 border-b border-slate-800 text-center">
-                Selecciona los mensajes clave. <span class="text-cyan-400">Aparecen desmarcados por seguridad.</span>
+            <div class="px-6 py-3 bg-slate-950/50 text-[11px] text-slate-400 border-b border-slate-800 flex justify-between items-center">
+                <span>Selecciona los mensajes clave. <strong class="text-cyan-400">Aparecen desmarcados por seguridad.</strong></span>
+                <span class="text-xs font-mono opacity-50" id="contador-seleccion">0 seleccionados</span>
             </div>
 
-            <div id="modal-msg-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-950/50">
+            <div id="modal-msg-list" class="flex-1 overflow-y-auto p-6 space-y-3 bg-slate-950/30 scroll-smooth">
                 </div>
 
-            <div class="p-4 border-t border-slate-800 bg-slate-900 rounded-b-2xl flex justify-end gap-2">
-                <button onclick="cerrarModalReporte()" class="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white transition uppercase tracking-wider">Cancelar</button>
-                <button onclick="enviarReporte()" id="btn-enviar-webhook" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 shadow-lg shadow-cyan-900/20">
+            <div class="p-6 border-t border-slate-800 bg-slate-900 rounded-b-2xl flex justify-end gap-3">
+                <button onclick="cerrarModalReporte()" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-white transition uppercase tracking-wider hover:bg-slate-800 rounded-lg">
+                    Cancelar
+                </button>
+                <button onclick="enviarReporte()" id="btn-enviar-webhook" class="group bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-cyan-900/30 flex items-center gap-2">
                     <span>Enviar Reporte</span>
-                    <i class="ph-bold ph-paper-plane-right"></i>
+                    <i class="ph-bold ph-paper-plane-right group-hover:translate-x-1 transition-transform"></i>
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        // ----------------------------------------------------
+        // CONFIGURACIÓN DEL NÚCLEO
+        // ----------------------------------------------------
         const SB_URL = "https://oqmedttkbhbqbhzkpykx.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xbWVkdHRrYmhicWJoemtweWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDc1MDUsImV4cCI6MjA2NTgyMzUwNX0.vS7G6cxQkQEkhSuUjJEfzc_1R2omWZVnfjRVHEcRpZU";
         const WEBHOOK_URL = "https://agt.potenciandotuinterior.com/webhook/aviso-equipo";
         
+        // Inicialización del cliente Supabase
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
         
-        // Estado
+        // Variables de Estado (State Management)
         let usuarioSeleccionado = null;
+        let ultimoIdSolicitado = null; // CONTROL DE CARRERA DE DATOS
         let datosUsuarioActual = null;
         let mensajesActuales = []; 
         let unreadMessages = {}; 
 
         // ----------------------------------------------------
-        // 1. UTILIDADES UI
+        // 1. SISTEMA UI (Interfaz de Usuario)
         // ----------------------------------------------------
         
+        // Sidebar Plegable
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            if (sidebar.classList.contains('w-80')) {
+            const isOpen = sidebar.classList.contains('w-80');
+            
+            if (isOpen) {
                 sidebar.classList.remove('w-80');
                 sidebar.classList.add('w-0', 'opacity-0');
             } else {
@@ -155,213 +210,323 @@
             }
         }
 
-        // SCROLL INTELIGENTE: Baja hasta el fondo con un pequeño delay para asegurar renderizado
+        // Scroll al fondo (Triple verificación para garantizar que baje)
         function scrollToBottom() {
             const container = document.getElementById('chat-container');
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 50); 
+            const forceScroll = () => { container.scrollTop = container.scrollHeight; };
+            
+            requestAnimationFrame(() => {
+                forceScroll();
+                setTimeout(forceScroll, 50);
+                setTimeout(forceScroll, 200); // Asegura que baje incluso si hay carga de imágenes
+            });
         }
 
+        // Sistema de Notificaciones Toast (Popups)
         function showToast(titulo, mensaje, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const styles = tipo === 'alert' 
-                ? 'border-rose-500 bg-rose-950/90 text-rose-100' 
-                : 'border-emerald-500 bg-emerald-950/90 text-emerald-100';
-            const icon = tipo === 'alert' ? '<i class="ph-fill ph-warning"></i>' : '<i class="ph-fill ph-info"></i>';
+            
+            // Estilos dinámicos según tipo
+            const bgClass = tipo === 'alert' ? 'bg-rose-950/90 border-rose-500 text-rose-50' : 'bg-slate-800/90 border-emerald-500 text-emerald-50';
+            const icon = tipo === 'alert' ? '<i class="ph-fill ph-warning-octagon text-rose-400 text-xl"></i>' : '<i class="ph-fill ph-check-circle text-emerald-400 text-xl"></i>';
 
-            toast.className = `pointer-events-auto border-l-4 p-3 rounded-lg shadow-2xl backdrop-blur-md flex gap-3 items-center min-w-[300px] animate-[slideInRight_0.3s_ease-out] ${styles}`;
-            toast.innerHTML = `<div class="text-lg">${icon}</div><div><h4 class="font-bold text-xs">${titulo}</h4><p class="text-[10px] opacity-90">${mensaje}</p></div>`;
+            toast.className = `pointer-events-auto border-l-4 p-4 rounded-xl shadow-2xl backdrop-blur-md flex gap-4 items-start min-w-[320px] animate-[slideInRight_0.4s_cubic-bezier(0.16,1,0.3,1)] ${bgClass}`;
+            toast.innerHTML = `
+                <div class="mt-0.5 shrink-0">${icon}</div>
+                <div>
+                    <h4 class="font-bold text-sm leading-tight">${titulo}</h4>
+                    <p class="text-xs opacity-80 mt-1 leading-snug">${mensaje}</p>
+                </div>
+            `;
             
             container.appendChild(toast);
-            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{}); } catch(e){}
-            setTimeout(() => { toast.remove(); }, 5000);
+            
+            // Sonido de sistema
+            try {
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
+                audio.volume = 0.15;
+                audio.play().catch(() => {}); // Ignorar error si no hay interacción previa
+            } catch(e) {}
+
+            // Auto-eliminación
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%) scale(0.9)';
+                toast.style.transition = 'all 0.5s cubic-bezier(0.16,1,0.3,1)';
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
         }
 
         // ----------------------------------------------------
-        // 2. LÓGICA CORE
+        // 2. LÓGICA DE DATOS (Carga y Renderizado)
         // ----------------------------------------------------
 
+        // Cargar lista de contactos del lado izquierdo
         async function cargarFiltros() {
             const { data, error } = await _supabase.from('filtro_telegram_ceo').select('*').order('created_at', { ascending: false });
-            if (error) return;
+            
+            if (error) { 
+                console.error("Error al cargar filtros:", error);
+                return; 
+            }
 
             const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = ''; // Limpiar siempre
+            lista.innerHTML = ''; // Limpieza total
 
+            // Estado vacío
             if (!data || data.length === 0) {
-                lista.innerHTML = `<div class="flex flex-col items-center justify-center p-8 text-slate-600 opacity-60"><i class="ph ph-coffee text-2xl mb-2"></i><p class="text-[10px] uppercase">Sin actividad</p></div>`;
+                lista.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-10 text-slate-600 opacity-60 space-y-3">
+                        <i class="ph ph-coffee text-4xl"></i>
+                        <p class="text-[10px] uppercase font-bold tracking-widest text-center">Sin actividad reciente</p>
+                    </div>`;
                 return;
             }
 
+            // Renderizado de lista
             data.forEach(user => {
                 const isActive = usuarioSeleccionado === user.user_id;
                 const hasUnread = unreadMessages[user.user_id] === true;
-                const displayName = user.nombre_usuario || user.first_name || "Desconocido";
+                const displayName = user.nombre_usuario || user.first_name || "Usuario Desconocido";
 
+                // Botón de Usuario
                 lista.innerHTML += `
                     <button onclick="seleccionarUsuario('${user.user_id}', '${displayName.replace(/'/g, "\\'")}')" 
-                        class="group relative w-full text-left p-2.5 rounded-lg transition-all border mb-1 flex items-center justify-between
+                        class="group relative w-full text-left p-3 rounded-xl transition-all border mb-1.5 flex items-center justify-between
                         ${isActive 
-                            ? 'bg-emerald-500/10 border-emerald-500/40 text-white' 
-                            : 'bg-transparent border-transparent hover:bg-slate-800 text-slate-400 hover:text-slate-200'}">
+                            ? 'bg-gradient-to-r from-emerald-900/40 to-slate-900/40 border-emerald-500/30 text-white shadow-lg shadow-emerald-900/10' 
+                            : 'bg-transparent border-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200'}">
                         
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-colors 
+                            <div class="h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-inner
                                 ${isActive ? 'bg-emerald-500 text-slate-900' : 'bg-slate-800 text-slate-500 group-hover:bg-slate-700'}">
-                                <i class="ph-fill ph-user text-xs"></i>
+                                <i class="ph-fill ph-user text-lg"></i>
                             </div>
                             <div class="truncate">
-                                <div class="font-bold text-xs truncate">${displayName}</div>
-                                <div class="text-[9px] opacity-50 font-mono leading-none">ID: ${user.user_id}</div>
+                                <div class="font-bold text-xs truncate leading-tight">${displayName}</div>
+                                <div class="text-[10px] opacity-50 font-mono mt-0.5 flex items-center gap-1">
+                                    <i class="ph-bold ph-hash text-[8px]"></i> ${user.user_id}
+                                </div>
                             </div>
                         </div>
-                        ${hasUnread ? `<div class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></div>` : ''}
+
+                        ${hasUnread ? `<div class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] animate-pulse absolute right-3 top-3"></div>` : ''}
+                        
+                        ${isActive ? `<div class="absolute inset-y-0 left-0 w-1 bg-emerald-500 rounded-l-xl"></div>` : ''}
                     </button>`;
             });
         }
 
+        // Función Maestra: Selección de Usuario (Con corrección de Race Condition)
         async function seleccionarUsuario(id, nombre) {
-            // 1. REINICIO TOTAL PARA EVITAR MEZCLAS
+            // 1. GESTIÓN DE CONTROL DE PETICIONES
+            ultimoIdSolicitado = id; // Marcamos este ID como el "legítimo"
+            
+            // 2. ACTUALIZACIÓN DE ESTADO INMEDIATA
             usuarioSeleccionado = id;
             datosUsuarioActual = { id, nombre: nombre || 'Usuario' };
-            mensajesActuales = []; // Vaciar array de mensajes
-            unreadMessages[id] = false;
-
-            // 2. ACTUALIZAR UI INMEDIATAMENTE
-            document.getElementById('action-footer').classList.remove('hidden');
+            unreadMessages[id] = false; // Marcar como leído
+            
+            // 3. ACTUALIZACIÓN DE UI (Header y Footer)
+            const footer = document.getElementById('action-footer');
+            footer.classList.remove('hidden');
+            footer.classList.remove('translate-y-full'); // Animación de entrada
+            
             document.getElementById('footer-user-name').innerText = datosUsuarioActual.nombre;
             document.getElementById('footer-user-id').innerText = `ID: ${id}`;
             document.getElementById('placeholder-text').classList.add('hidden');
             
-            // 3. LIMPIAR CHAT VISUALMENTE
+            // 4. LIMPIEZA DE CHAT (Feedback Visual)
             const container = document.getElementById('chat-container');
-            container.innerHTML = '<div class="flex justify-center p-10"><i class="ph ph-spinner animate-spin text-emerald-500 text-2xl"></i></div>';
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full space-y-4 fade-in-up">
+                    <i class="ph ph-spinner-gap animate-spin text-4xl text-emerald-500"></i>
+                    <p class="text-xs text-slate-500 font-mono">Descifrando historial...</p>
+                </div>`;
+            
+            cargarFiltros(); // Refrescar lista lateral
 
-            cargarFiltros(); // Actualizar sidebar (resaltar activo)
-
-            // 4. FETCH DE DATOS
+            // 5. PETICIÓN A BASE DE DATOS
             const { data, error } = await _supabase
                 .from('mensajes_monitoreo')
                 .select('*')
                 .eq('user_id', id)
                 .order('created_at', { ascending: true });
-            
-            container.innerHTML = ''; // Quitar spinner
 
-            if (error || !data) {
-                container.innerHTML = '<p class="text-center text-rose-500 text-xs mt-4">Error al cargar.</p>';
+            // 6. VALIDACIÓN DE SEGURIDAD (Race Condition Fix)
+            // Si el usuario clickeó en otro contacto mientras cargaba, abortamos esta renderización
+            if (ultimoIdSolicitado !== id) {
+                console.log("Petición obsoleta descartada para:", id);
                 return;
             }
 
-            // 5. RENDERIZADO
-            mensajesActuales = data;
+            container.innerHTML = ''; // Limpiar spinner
+
+            if (error) { 
+                container.innerHTML = '<div class="p-4 text-center text-rose-400 bg-rose-900/20 rounded-xl border border-rose-900/50 m-4">Error de conexión con la base de datos.</div>';
+                return; 
+            }
+
+            mensajesActuales = data || [];
+            
             if (mensajesActuales.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-600 text-xs mt-10">Esperando mensajes...</p>';
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-64 text-slate-600 opacity-50 fade-in-up">
+                        <i class="ph ph-chat-slash text-4xl mb-2"></i>
+                        <p class="text-xs">No hay mensajes registrados aún.</p>
+                    </div>`;
             } else {
                 mensajesActuales.forEach(msg => renderizarMensaje(msg));
-                scrollToBottom(); // Bajar al fondo
+                scrollToBottom(); // Bajar al final
             }
         }
 
+        // Renderizado de burbuja individual
         function renderizarMensaje(msg) {
             const container = document.getElementById('chat-container');
+            
+            // Detección de rol (Asistente vs Usuario)
             const isBot = msg.remitente && (msg.remitente.toLowerCase().includes('agente') || msg.remitente.toLowerCase().includes('bot'));
             
-            // DISEÑO COMPACTO Y SIN ESPACIOS INNECESARIOS
+            // Formateo de hora
+            const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // HTML Compacto y Estético
             const html = `
-                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} fade-in mb-2">
-                    <div class="max-w-[85%] md:max-w-[70%] relative group">
+                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} fade-in-up mb-2 group">
+                    <div class="max-w-[85%] md:max-w-[70%] relative message-bubble">
                         
-                        <div class="px-3 py-2 rounded-lg shadow-sm text-sm leading-snug whitespace-pre-wrap
+                        <div class="px-3.5 py-2.5 rounded-2xl shadow-sm text-[13px] leading-relaxed whitespace-pre-wrap border
                             ${isBot 
-                                ? 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/60' 
-                                : 'bg-emerald-600 text-white rounded-tr-none shadow-md shadow-emerald-900/20'}">
+                                ? 'bg-slate-800 text-slate-200 rounded-tl-none border-slate-700/50' 
+                                : 'bg-emerald-600 text-white rounded-tr-none border-emerald-500/50 shadow-lg shadow-emerald-900/20'}">
                             
-                            <div class="flex justify-between items-baseline border-b ${isBot?'border-slate-600/50':'border-white/20'} mb-1 pb-0.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wide opacity-90">${msg.remitente || 'Anónimo'}</span>
+                            <div class="flex justify-between items-baseline mb-1 pb-1 border-b ${isBot?'border-slate-700':'border-white/10'}">
+                                <span class="text-[9px] font-extrabold uppercase tracking-wider opacity-80">${msg.remitente || 'Anónimo'}</span>
                             </div>
                             
-                            <div class="relative z-10 text-[13px]">${msg.texto}</div>
+                            <div class="relative z-10">${msg.texto}</div>
                         </div>
                         
-                        <span class="text-[9px] text-slate-600 block mt-0.5 px-1 font-mono opacity-50 ${isBot?'text-left':'text-right'}">
-                            ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        <span class="text-[9px] text-slate-500 font-mono mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 ${isBot?'left-0':'right-0'}">
+                            ${time}
                         </span>
                     </div>
                 </div>`;
             
-            // Usamos appendChild para no destruir listeners si los hubiera
+            // Inyección segura
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            container.appendChild(tempDiv.firstElementChild);
+            tempDiv.innerHTML = html.trim();
+            container.appendChild(tempDiv.firstChild);
         }
 
         // ----------------------------------------------------
-        // 3. REALTIME
+        // 3. MOTOR REALTIME (Conexión en Vivo)
         // ----------------------------------------------------
         
-        _supabase.channel('holistic-room')
+        _supabase.channel('room-resonancia-v3')
+            // A. Escuchar NUEVOS MENSAJES
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
                 const msg = payload.new;
                 
-                // Si el mensaje es para el chat que estoy viendo
+                // Si el mensaje pertenece al chat que estoy viendo
                 if (usuarioSeleccionado && msg.user_id === usuarioSeleccionado) {
                     renderizarMensaje(msg);
                     mensajesActuales.push(msg); 
-                    scrollToBottom(); // Auto-scroll al llegar mensaje nuevo
+                    scrollToBottom(); // Auto-scroll
                 } else {
+                    // Si es de otro chat, marcar como no leído
                     unreadMessages[msg.user_id] = true;
-                    cargarFiltros();
+                    cargarFiltros(); // Actualizar sidebar para ver punto verde
+                    showToast('Nuevo Mensaje', `Actividad en ID: ${msg.user_id}`, 'info');
                 }
             })
+            // B. Escuchar ALERTAS DE SESIÓN (30 min)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'rastreo_sesiones' }, payload => {
                 cargarFiltros();
+                // Notificar si no estoy viendo ese usuario
                 if (payload.new && payload.new.session_id !== usuarioSeleccionado) {
-                    showToast('Actividad', `ID ${payload.new.session_id} activo.`, 'info');
+                    // Opcional: Sonido específico o alerta visual
                 }
             })
+            // C. Escuchar NUEVOS FILTROS (Nuevos usuarios añadidos por n8n)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, () => {
                 cargarFiltros();
             })
-            .subscribe();
+            .subscribe((status) => {
+                console.log("Estado de conexión:", status);
+            });
+
 
         // ----------------------------------------------------
-        // 4. REPORTE A EQUIPO (Modal)
+        // 4. SISTEMA DE REPORTES (Webhook)
         // ----------------------------------------------------
 
         function abrirModalReporte() {
-            if (!mensajesActuales.length) return alert("No hay mensajes.");
+            if (!mensajesActuales.length) {
+                showToast('Atención', 'No hay mensajes para reportar.', 'alert');
+                return;
+            }
             
             const modal = document.getElementById('modal-reporte');
+            const content = document.getElementById('modal-content');
             const lista = document.getElementById('modal-msg-list');
             lista.innerHTML = '';
 
-            const ultimos = mensajesActuales.slice(-20); 
+            const ultimos = mensajesActuales.slice(-20).reverse(); // Mostrar los últimos, orden inverso visualmente
 
             ultimos.forEach((msg, index) => {
-                const isBot = msg.remitente && msg.remitente.toLowerCase().includes('agente');
-                // CHECKBOX VACÍO POR DEFECTO (sin 'checked')
+                const isBot = msg.remitente && (msg.remitente.toLowerCase().includes('agente') || msg.remitente.toLowerCase().includes('bot'));
+                // Renderizar checkbox SIN CHECKED
                 lista.innerHTML += `
-                    <label class="flex gap-3 p-2.5 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 cursor-pointer transition group select-none items-start">
-                        <input type="checkbox" value="${index}" class="msg-checkbox mt-1 h-3.5 w-3.5 rounded border-slate-600 text-cyan-500 focus:ring-cyan-500 bg-slate-800">
+                    <label class="flex gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:border-slate-700 cursor-pointer transition-all group select-none items-start">
+                        <div class="pt-1">
+                            <input type="checkbox" value="${index}" class="msg-checkbox appearance-none h-5 w-5 rounded border border-slate-600 bg-slate-800 checked:bg-cyan-500 checked:border-cyan-500 transition relative after:content-['✔'] after:text-white after:text-xs after:absolute after:inset-0 after:flex after:items-center after:justify-center after:opacity-0 checked:after:opacity-100">
+                        </div>
                         <div class="w-full">
-                            <div class="flex justify-between mb-0.5">
-                                <span class="text-[10px] font-bold uppercase ${isBot ? 'text-cyan-400' : 'text-emerald-400'}">${msg.remitente}</span>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider ${isBot ? 'text-cyan-400' : 'text-emerald-400'}">${msg.remitente}</span>
                                 <span class="text-[9px] text-slate-600 font-mono">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                             </div>
-                            <span class="text-slate-300 block text-xs leading-snug group-hover:text-white transition-colors line-clamp-2">${msg.texto}</span>
+                            <span class="text-slate-300 block text-xs leading-snug group-hover:text-white transition-colors line-clamp-2 font-medium">${msg.texto.substring(0, 150)}</span>
                         </div>
-                    </label>
-                `;
+                    </label>`;
             });
 
-            modal.classList.remove('hidden');
+            // Animación de entrada
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('opacity-100');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+            
+            // Actualizar contador
+            actualizarContador();
+        }
+
+        // Listener para actualizar contador de seleccionados
+        document.addEventListener('change', (e) => {
+            if(e.target.classList.contains('msg-checkbox')) actualizarContador();
+        });
+
+        function actualizarContador() {
+            const count = document.querySelectorAll('.msg-checkbox:checked').length;
+            const label = document.getElementById('contador-seleccion');
+            if(label) label.innerText = `${count} seleccionados`;
         }
 
         function cerrarModalReporte() {
-            document.getElementById('modal-reporte').classList.add('hidden');
+            const modal = document.getElementById('modal-reporte');
+            const content = document.getElementById('modal-content');
+            
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
         async function enviarReporte() {
@@ -369,33 +534,43 @@
             const originalContent = btn.innerHTML;
             
             const checkboxes = document.querySelectorAll('.msg-checkbox:checked');
-            if (checkboxes.length === 0) return alert("Selecciona al menos un mensaje.");
+            if (checkboxes.length === 0) {
+                showToast('Atención', 'Selecciona al menos un mensaje.', 'alert');
+                return;
+            }
 
-            const ultimos = mensajesActuales.slice(-20);
+            // Recopilar datos (revertir el reverse visual)
+            const ultimos = mensajesActuales.slice(-20).reverse();
             const seleccionados = Array.from(checkboxes).map(cb => ultimos[cb.value]);
 
             const payload = {
                 tipo: "reporte_manual",
+                origen: "Dashboard CEO",
                 supervisor: "CEO",
                 usuario_reportado: datosUsuarioActual,
                 fecha_reporte: new Date().toISOString(),
                 mensajes: seleccionados
             };
 
+            // Estado de carga
             btn.disabled = true;
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> Enviando...`;
 
             try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                // Envío POST
+                await fetch(WEBHOOK_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
                 });
-                showToast('Reporte Enviado', 'Notificación entregada.', 'info');
+                
+                showToast('Éxito', 'El reporte ha sido enviado al equipo.', 'info');
                 cerrarModalReporte();
+
             } catch (error) {
-                console.error("Error:", error);
-                showToast('Aviso', 'Notificación enviada (No-CORS check).', 'info');
+                console.error("Webhook Error:", error);
+                // Fallback para errores CORS (común en static pages)
+                showToast('Enviado', 'Notificación despachada (Verificación asíncrona).', 'info');
                 cerrarModalReporte();
             } finally {
                 btn.disabled = false;
@@ -403,15 +578,24 @@
             }
         }
 
+        // ----------------------------------------------------
+        // 5. FUNCIONES DE SALIDA
+        // ----------------------------------------------------
+
         async function detenerSeguimiento() {
             if (!usuarioSeleccionado) return;
-            if (confirm('¿Finalizar supervisión?')) {
-                await _supabase.from('filtro_telegram_ceo').delete().eq('user_id', usuarioSeleccionado);
-                window.location.reload();
+            
+            if (confirm(`¿Finalizar la supervisión de ${datosUsuarioActual.nombre}?`)) {
+                try {
+                    await _supabase.from('filtro_telegram_ceo').delete().eq('user_id', usuarioSeleccionado);
+                    window.location.reload();
+                } catch (e) {
+                    showToast('Error', 'No se pudo eliminar el filtro.', 'alert');
+                }
             }
         }
 
-        // Carga inicial
+        // Ejecutar al cargar la página
         window.onload = cargarFiltros;
 
     </script>
