@@ -6,97 +6,162 @@
     <title>CEO Dashboard - Realtime Monitor</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo para ocultar el scrollbar pero mantener la funcionalidad */
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+    </style>
 </head>
 <body class="bg-slate-900 text-white h-screen flex flex-col">
 
-    <header class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
-        <h1 class="text-xl font-bold text-emerald-400">Panel de Supervisión CEO</h1>
-        <div id="status" class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">Sistema Online</div>
+    <header class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800 shadow-xl">
+        <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            Panel de Supervisión CEO
+        </h1>
+        <div id="status" class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
+            Sistema en Tiempo Real
+        </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <aside class="w-1/4 border-r border-slate-700 bg-slate-800 p-4">
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4">Conversaciones Activas</h2>
+        <aside class="w-1/4 border-r border-slate-700 bg-slate-800 p-4 overflow-y-auto">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 px-2">Conversaciones Activas</h2>
             <div id="lista-usuarios" class="space-y-2">
                 </div>
         </aside>
 
-        <main class="flex-1 flex flex-col bg-slate-900">
+        <main class="flex-1 flex flex-col bg-slate-900 relative">
             <div id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-4">
-                <div class="text-center text-slate-500 mt-20">Selecciona un usuario para ver la conversación</div>
+                <div id="placeholder-text" class="text-center text-slate-500 mt-20 flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-4 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path></svg>
+                    Selecciona un usuario a la izquierda para ver el chat
+                </div>
             </div>
 
-            <div class="p-4 border-t border-slate-700 bg-slate-800 flex justify-end">
-                <button onclick="detenerSeguimiento()" id="btn-stop" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition-all shadow-lg">
-                    Terminar Supervisión (Botón Rojo)
+            <div class="p-4 border-t border-slate-700 bg-slate-800 flex justify-end items-center gap-4">
+                <span id="label-usuario" class="text-sm text-slate-400"></span>
+                <button onclick="detenerSeguimiento()" id="btn-stop" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition-all shadow-lg active:scale-95">
+                    🔴 Detener Supervisión
                 </button>
             </div>
         </main>
     </div>
 
-     <script>
+    <script>
+        // Configuración de Credenciales
         const SB_URL = "https://oqmedttkbhbqbhzkpykx.supabase.co";
-        const SB_KEY = "tu_clave_aqui";
-        // Cambiamos el nombre de la constante para evitar conflictos con la librería global
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xbWVkdHRrYmhicWJoemtweWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNDc1MDUsImV4cCI6MjA2NTgyMzUwNX0.vS7G6cxQkQEkhSuUjJEfzc_1R2omWZVnfjRVHEcRpZU";
+        
+        // Creamos el cliente con un nombre que no choque con la librería global
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
-    
+
         let usuarioSeleccionado = null;
-    
+
+        // 1. Cargar lista de usuarios desde la tabla 'filtro_telegram_ceo'
         async function cargarFiltros() {
             const { data, error } = await _supabase.from('filtro_telegram_ceo').select('*');
-            if (error) { console.error("Error en filtros:", error); return; }
+            if (error) { console.error("Error cargando filtros:", error); return; }
             
             const lista = document.getElementById('lista-usuarios');
             lista.innerHTML = '';
+            
+            if (data.length === 0) {
+                lista.innerHTML = '<p class="text-xs text-slate-500 px-2 italic">No hay usuarios en el filtro.</p>';
+                return;
+            }
+
             data.forEach(user => {
+                const isActive = usuarioSeleccionado === user.user_id;
                 lista.innerHTML += `
-                    <button onclick="seleccionarUsuario('${user.user_id}')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition mb-2">
-                        👤 ID: ${user.user_id}
+                    <button onclick="seleccionarUsuario('${user.user_id}')" 
+                        class="w-full text-left p-3 rounded-lg transition-all border ${isActive ? 'bg-emerald-600/20 border-emerald-500 text-white' : 'bg-slate-700 border-transparent hover:bg-slate-600 text-slate-300'}">
+                        <div class="font-mono text-sm">🆔 ${user.user_id}</div>
+                        <div class="text-[10px] opacity-60 uppercase mt-1">Vigilando ahora</div>
                     </button>`;
             });
         }
-    
+
+        // 2. Seleccionar usuario y cargar su historial de mensajes
         async function seleccionarUsuario(id) {
             usuarioSeleccionado = id;
             document.getElementById('btn-stop').classList.remove('hidden');
+            document.getElementById('placeholder-text').classList.add('hidden');
+            document.getElementById('label-usuario').innerText = `Vigilando ID: ${id}`;
+            
+            // Actualizar UI de la lista lateral
+            cargarFiltros();
+
             const { data, error } = await _supabase.from('mensajes_monitoreo')
                 .select('*')
                 .eq('user_id', id)
                 .order('created_at', { ascending: true });
             
-            if (error) { console.error("Error en mensajes:", error); return; }
-    
+            if (error) { console.error("Error cargando mensajes:", error); return; }
+
             const container = document.getElementById('chat-container');
             container.innerHTML = '';
             data.forEach(msg => renderizarMensaje(msg));
             container.scrollTop = container.scrollHeight;
         }
-    
+
+        // 3. Función para pintar los globos de texto
         function renderizarMensaje(msg) {
             const container = document.getElementById('chat-container');
-            // Ajustado para que detecte "El Agente" según tu SQL
+            // IMPORTANTE: Según tus datos, el bot se identifica como "El Agente"
             const isBot = msg.remitente.toLowerCase().includes('agente');
+            
             const html = `
-                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} mb-4">
-                    <div class="max-w-xs md:max-w-md p-3 rounded-lg ${isBot ? 'bg-slate-700 text-white' : 'bg-emerald-600 text-white shadow-lg'}">
-                        <div class="text-[10px] opacity-50 mb-1 font-bold">${msg.remitente.toUpperCase()}</div>
-                        <div class="text-sm">${msg.texto}</div>
+                <div class="flex ${isBot ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div class="max-w-[80%] p-3 rounded-2xl shadow-md ${isBot ? 'bg-slate-800 border border-slate-700 text-slate-100 rounded-tl-none' : 'bg-emerald-600 text-white rounded-tr-none'}">
+                        <div class="text-[9px] font-bold opacity-60 mb-1 tracking-tighter uppercase">${msg.remitente}</div>
+                        <div class="text-sm leading-relaxed">${msg.texto}</div>
+                        <div class="text-[9px] opacity-40 mt-1 text-right">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                     </div>
                 </div>`;
             container.innerHTML += html;
             container.scrollTop = container.scrollHeight;
         }
-    
-        // Suscripción Realtime corregida
+
+        // 4. SUSCRIPCIÓN EN TIEMPO REAL (Supabase Realtime)
         _supabase
-            .channel('db-changes')
+            .channel('public-mensajes')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
+                // Si el mensaje nuevo es del usuario que estamos viendo, lo pintamos
                 if (usuarioSeleccionado && payload.new.user_id === usuarioSeleccionado) {
                     renderizarMensaje(payload.new);
                 }
             })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, () => {
+                // Si alguien añade un ID nuevo al filtro en n8n, refrescamos la lista lateral
+                cargarFiltros();
+            })
             .subscribe();
-    
+
+        // 5. Función del BOTÓN ROJO (Borrar el filtro)
+        async function detenerSeguimiento() {
+            if (!usuarioSeleccionado) return;
+            
+            const confirmar = confirm('¿Deseas finalizar la supervisión de este usuario? Se eliminará del filtro de n8n.');
+            if (confirmar) {
+                const { error } = await _supabase
+                    .from('filtro_telegram_ceo')
+                    .delete()
+                    .eq('user_id', usuarioSeleccionado);
+                
+                if (error) {
+                    alert('Error al eliminar: ' + error.message);
+                } else {
+                    alert('Supervisión finalizada con éxito.');
+                    location.reload(); // Recargar para limpiar la interfaz
+                }
+            }
+        }
+
+        // Iniciar carga al abrir la página
         cargarFiltros();
     </script>
 </body>
