@@ -1,43 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>CEO Monitor Control</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Dashboard - Realtime Monitor</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        /* Un poco de estilo para que no se vea feo */
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .chat-box { background: white; height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-        .mensaje-asistente { color: blue; margin-bottom: 5px; }
-        .mensaje-usuario { color: green; margin-bottom: 5px; }
-        .btn-rojo { background: red; color: white; border: none; padding: 10px; cursor: pointer; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Monitor de Conversaciones</h1>
-    <div id="lista-mensajes" class="chat-box"></div>
-    <button class="btn-rojo" onclick="detenerSeguimiento()">🔴 Salir de la conversación</button>
+<body class="bg-slate-900 text-white h-screen flex flex-col">
+
+    <header class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+        <h1 class="text-xl font-bold text-emerald-400">Panel de Supervisión CEO</h1>
+        <div id="status" class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">Sistema Online</div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-1/4 border-r border-slate-700 bg-slate-800 p-4">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4">Conversaciones Activas</h2>
+            <div id="lista-usuarios" class="space-y-2">
+                </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-slate-900">
+            <div id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-4">
+                <div class="text-center text-slate-500 mt-20">Selecciona un usuario para ver la conversación</div>
+            </div>
+
+            <div class="p-4 border-t border-slate-700 bg-slate-800 flex justify-end">
+                <button onclick="detenerSeguimiento()" id="btn-stop" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition-all shadow-lg">
+                    Terminar Supervisión (Botón Rojo)
+                </button>
+            </div>
+        </main>
+    </div>
 
     <script>
-        // Configuración de Supabase
-        const supabaseUrl = 'TU_SUPABASE_URL';
-        const supabaseKey = 'TU_SUPABASE_ANON_KEY';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const SB_URL = "TU_SUPABASE_URL";
+        const SB_KEY = "TU_SUPABASE_ANON_KEY";
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // Escuchar mensajes en tiempo real
-        supabase
-          .channel('cambios-mensajes')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
-            const msg = payload.new;
-            const div = document.getElementById('lista-mensajes');
-            div.innerHTML += `<p class="mensaje-${msg.remitente}"><b>${msg.remitente.toUpperCase()}:</b> ${msg.texto}</p>`;
-            div.scrollTop = div.scrollHeight; // Auto-scroll
-          })
-          .subscribe();
+        let usuarioSeleccionado = null;
 
-        async function detenerSeguimiento() {
-            // Aquí pones la lógica para borrar el ID de la tabla filtro_telegram_ceo
-            alert("Conversación finalizada y filtro borrado.");
+        // 1. Cargar lista de usuarios vigilados inicialmente
+        async function cargarFiltros() {
+            const { data } = await supabase.from('filtro_telegram_ceo').select('*');
+            const lista = document.getElementById('lista-usuarios');
+            lista.innerHTML = '';
+            data.forEach(user => {
+                lista.innerHTML += `
+                    <button onclick="seleccionarUsuario('${user.user_id}')" class="w-full text-left p-3 rounded bg-slate-700 hover:bg-slate-600 transition">
+                        ID: ${user.user_id}
+                    </button>`;
+            });
         }
+
+        // 2. Seleccionar un usuario y cargar sus mensajes
+        async function seleccionarUsuario(id) {
+            usuarioSeleccionado = id;
+            document.getElementById('btn-stop').classList.remove('hidden');
+            const { data } = await supabase.from('mensajes_monitoreo')
+                .select('*')
+                .eq('user_id', id)
+                .order('created_at', { ascending: true });
+            
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '';
+            data.forEach(msg => renderizarMensaje(msg));
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderizarMensaje(msg) {
+            const container = document.getElementById('chat-container');
+            const isBot = msg.remitente.toLowerCase().includes('asistente');
+            const html = `
+                <div class="flex ${isBot ? 'justify-start' : 'justify-end'}">
+                    <div class="max-w-xs md:max-w-md p-3 rounded-lg ${isBot ? 'bg-slate-700 text-white' : 'bg-emerald-600 text-white'}">
+                        <div class="text-[10px] opacity-50 mb-1">${msg.remitente.toUpperCase()}</div>
+                        <div>${msg.texto}</div>
+                    </div>
+                </div>`;
+            container.innerHTML += html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 3. SUSCRIPCIÓN REALTIME
+        supabase
+            .channel('any')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes_monitoreo' }, payload => {
+                if (usuarioSeleccionado && payload.new.user_id === usuarioSeleccionado) {
+                    renderizarMensaje(payload.new);
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'filtro_telegram_ceo' }, payload => {
+                cargarFiltros(); // Si el CEO añade o quita filtros desde n8n, la lista se actualiza
+            })
+            .subscribe();
+
+        // 4. EL BOTÓN ROJO
+        async function detenerSeguimiento() {
+            if (!usuarioSeleccionado) return;
+            if (confirm('¿Seguro que quieres dejar de vigilar a este usuario y borrarlo del filtro?')) {
+                await supabase.from('filtro_telegram_ceo').delete().eq('user_id', usuarioSeleccionado);
+                alert('Filtro eliminado.');
+                location.reload();
+            }
+        }
+
+        cargarFiltros();
     </script>
 </body>
 </html>
